@@ -1,227 +1,61 @@
-# AI Magic Mirror ✨
+# AI Magic Mirror & Real-Time Expression Suite ✨
 
-> **A real-time, 100% in-browser interactive face-effects experience built with Vite, React, TypeScript, Tailwind CSS, and MediaPipe Face Landmarker.**
+[![License: Proprietary](https://img.shields.io/badge/License-Proprietary%20%2F%20All%20Rights%20Reserved-red.svg)](LICENSE)
+[![Platform: Web (WASM/WebGL)](https://img.shields.io/badge/Platform-Browser%20%7C%20On--Device-blue.svg)]()
+[![Privacy: Zero-Telemetry](https://img.shields.io/badge/Privacy-100%25%20Client--Side-emerald.svg)]()
 
-A parent stands in front of the webcam and sees themselves mirrored on screen. The app detects their face and overlays interactive visual effects that track head pose in real time and react live to physical facial expressions (smiles, open mouth / surprise, raised eyebrows, winks, kisses). Dual-face tracking allows parent and child to interact simultaneously with independent visual effects!
-
----
-
-## 🔒 1. Privacy Statement & Guarantees (Non-Negotiable)
-
-1. **100% In-Browser Local Execution:**
-   - All facial landmark detection, head pose estimation, and blendshape classification execute strictly inside the client browser using WebAssembly and WebGL.
-   - **Zero telemetry, zero image uploads, zero API calls, and zero external tracking.**
-   - The MediaPipe model (`face_landmarker.task`, 3.7MB) and WASM binaries are hosted locally in `/public/models` and `/public/wasm` for complete offline capability.
-
-2. **Zero Biometric or Emotional Profiling:**
-    - Facial movements are described playfully and neutrally (e.g., *"Smile detected ✨"*, *"Sad face detected 😢"*, *"Angry face detected 😠"*, *"Mouth open 😮"*, *"Eyebrows raised 💫"*, *"Neutral face 🪞"*).
-   - Wording is playful, respectful, and non-judgmental.
-
-3. **Explicit Consent & Clean Lifecycle:**
-   - Camera access starts only after the user explicitly clicks **"Start the Magic ✨"**.
-   - Clicking **"Stop"** or closing the tab immediately stops all webcam hardware tracks and purges memory.
-   - Photos captured via the **Capture 📸** button are composited locally on a hidden `<canvas>` and saved exclusively to the user's local device download folder.
+> **An interactive, browser-based facial tracking and dynamic effects experience powered by on-device computer vision and low-latency landmark classification.**
 
 ---
 
-## 🚀 2. Quickstart & Setup
+## 🌟 Overview
 
-### Prerequisites
-- Node.js 18+ (tested on Node 20 & 24)
-- Modern web browser (Chrome, Edge, Safari, Firefox) with WebGL support and webcam access
+**AI Magic Mirror** is a real-time interactive computer vision application developed for high-engagement, touch-friendly kiosk and showcase environments. Operating entirely within client-side WebAssembly and WebGL runtimes, the system detects user facial landmarks, models head pose kinematics, and triggers dynamic vector-based visual effects reacting to live facial movements.
 
-### Installation
-```bash
-# 1. Install dependencies
-npm install
-
-# 2. Start the local development server
-npm run dev
-```
-
-Open `http://localhost:3000/` in your browser.
-
-### Running Unit Tests
-```bash
-npm test
-```
-
-### Production Build & Preview
-```bash
-npm run build
-npm run preview
-```
+### Key Highlights
+- **100% Client-Side Pipeline:** Zero external API dependencies, zero cloud telemetry, and zero biometric persistence. All video processing and landmark calculations remain strictly inside the local browser sandbox.
+- **Dual-Face Simultaneous Tracking:** Capable of tracking multiple independent faces concurrently with per-face pose smoothing and isolated visual overlays.
+- **Adaptive Micro-Smoothing:** Uses speed-adaptive low-pass filtering (One Euro Filter architecture) to eliminate camera sensor jitter while preserving sub-30ms responsiveness.
+- **Physical Expression Classification:** Evaluates high-dimensional blendshapes with hysteresis and debounce filtering to reliably detect smiles, winks, eyebrow elevations, downturns, and mouth opening.
+- **Dynamic Modular Visual Layers:** Generates real-time procedural canvas visuals, physics-driven accessories, and particle halos tuned to selectable color palettes.
 
 ---
 
-## 🛠️ 3. How It Works (Architecture)
+## 🎭 Experience Modes & Effects
 
-```
-src/
-├── core/
-│   ├── camera.ts         # Webcam initialization (720p), device enumeration, cleanup, low-light analyzer
-│   ├── faceTracker.ts    # MediaPipe Face Landmarker loader (GPU with CPU fallback) & multi-face loop
-│   ├── smoothing.ts      # One Euro Filter (Casiez et al.) for jitter-free pose & anchor tracking
-│   ├── pose.ts           # Matrix decomposition (yaw/pitch/roll) + robust 3D geometric fallback
-│   └── expressions.ts    # Blendshape classification, 150ms debounce, and hysteresis thresholds
-├── effects/
-│   ├── Effect.ts         # BaseEffect abstract class & pooled particle system
-│   ├── crown.ts          # Golden Crown: forehead anchored, pitch/roll tilt, smile sparkle burst
-│   ├── glasses.ts        # Cool Shades: spring physics flip up onto forehead on eyebrow raise
-│   ├── aura.ts           # Sparkle Aura: pulsing halo, emission scales with smile intensity
-│   ├── rainbow.ts        # Rainbow Breath: cascading undulating rainbow waterfall when mouth opens
-│   ├── eyes.ts           # Heart/Star Eyes: animated eye replacements + floating kiss particles
-│   ├── mesh.ts           # Face Mesh Neon: futuristic sci-fi wireframe & laser scanline (Science Mode)
-│   ├── ears.ts           # Animal Ears & Nose: wiggle physics on head roll + cute button nose
-│   ├── vignette.ts       # Atmospheric theme vignette and backdrop tint
-│   ├── themes.ts         # 4 Theme configurations (Royal, Space, Garden, Neon)
-│   └── index.ts          # EffectManager lifecycle & composite rendering
-├── components/
-│   ├── WelcomeScreen.tsx # Cinematic consent screen, privacy badges, and loader
-│   ├── MirrorStage.tsx   # Video/canvas compositing stage, keyboard handlers, and 60 FPS loop
-│   ├── TopBar.tsx        # Status chip, live friendly expression badge, quick action buttons
-│   ├── StatusChip.tsx    # Live face count, dual-track badge, FPS & latency readout
-│   ├── EffectDock.tsx    # Large touch-friendly effect toggles (1-7) & theme selector
-│   ├── ExpressionMeter.tsx # Real-time scientific blendshape bars
-│   ├── SettingsDrawer.tsx # Smoothing strength (Responsive/Balanced/Silky), camera picker, intensity
-│   ├── CaptureModal.tsx  # 3-2-1 countdown, camera flash, local PNG download, and confetti burst
-│   └── ErrorStates.tsx   # Permission guide, model error retry, low-light tip, attract mode
-├── store/
-│   └── useMirrorStore.ts # Central Zustand state management
-└── types.ts              # TypeScript interfaces
-```
-
-### Head Pose & One Euro Filter Smoothing
-Head tracking uses MediaPipe's `facialTransformationMatrixes` column-major matrix to compute Euler angles:
-- **Pitch ($\theta_x$):** $\text{atan2}(-r_{12}, \sqrt{r_{02}^2 + r_{22}^2})$
-- **Yaw ($\theta_y$):** $\text{atan2}(r_{02}, r_{22})$
-- **Roll ($\theta_z$):** $\text{atan2}(r_{10}, r_{11})$
-
-To eliminate high-frequency webcam jitter while maintaining near-zero latency (< 25–40ms), every face landmark and pose angle is filtered through a **One Euro Filter** (`OneEuroFilter`), which adaptively adjusts cutoff frequency based on instantaneous speed:
-- **Low velocity:** Low cutoff ($f_{\min} = 0.8\text{ Hz}$), removing jitter when the subject is still.
-- **High velocity:** High cutoff scaled by $\beta \cdot |\dot{x}|$, eliminating lag during rapid head movements.
-- Configurable in the Settings Drawer: **Responsive**, **Balanced**, or **Silky**.
+| Effect Module | Description | Reactive Mechanics |
+| :--- | :--- | :--- |
+| **Golden Imperial Crown** | Ornate metallic headpiece anchored to forehead vector | Angular roll/pitch compensation with smile-activated sparkle bursts |
+| **Aero Shades** | Polarized procedural eyewear with metallic sheen | Rotational spring-damper flip animation triggered by eyebrow elevation |
+| **Radiant Aura** | Radial perimeter particle halo | Emission velocity and particle density scale dynamically with smile intensity |
+| **Prismatic Cascade** | Undulating multi-channel color ribbon stream | Velocity-driven dispersion emitted on mouth opening |
+| **Celestial & Heart Overlays** | Animated eye replacements with depth tracking | Wink asymmetry recognition, pucker droplet particle emissions |
+| **Cyber Wireframe Mesh** | High-density 478-node facial topology visualization | Real-time anatomical contour rendering with holographic scanning line |
+| **Dynamic Animal Archetypes** | Procedural ears and facial anchors | Angular inertia physics and head-tilt spring recoil |
 
 ---
 
-## 🎨 4. How to Add a New Effect
+## 🛡️ Privacy Architecture
 
-Creating a new interactive face effect takes just 3 simple steps:
+This project was built from the ground up to comply with strict privacy standards for public exhibits, educational venues, and family events:
 
-1. **Create the Effect Class** (e.g., `src/effects/mustache.ts`):
-   ```typescript
-   import { BaseEffect } from './Effect';
-   import { DetectedFace, ThemeConfig } from '../types';
-
-   export class MustacheEffect extends BaseEffect {
-     id = 'mustache';
-     name = 'Mustache';
-     iconName = 'Smile';
-     description = 'Fancy handlebar mustache that twirls when you smile!';
-
-     private twirlAngle = 0;
-
-     update(face: DetectedFace, dt: number, _theme: ThemeConfig, intensity: number): void {
-       // React to smile blendshape
-       const smile = face.expression.scores.smile;
-       this.twirlAngle += dt * (smile > 0.4 ? 12 : 2);
-     }
-
-     render(
-       ctx: CanvasRenderingContext2D,
-       face: DetectedFace,
-       theme: ThemeConfig,
-       intensity: number,
-       _isMirrored: boolean
-     ): void {
-       const { mouthUpper, faceWidth } = face.anchors;
-       const { roll } = face.pose;
-       const width = faceWidth * 0.45 * intensity;
-
-       ctx.save();
-       ctx.translate(mouthUpper.x, mouthUpper.y - 6);
-       ctx.rotate(roll);
-
-       // Draw vector mustache with bezier curves
-       ctx.fillStyle = theme.primaryColor;
-       ctx.beginPath();
-       ctx.moveTo(0, 0);
-       ctx.quadraticCurveTo(-width * 0.3, -15, -width * 0.5, 0);
-       ctx.quadraticCurveTo(-width * 0.25, 12, 0, 4);
-       ctx.quadraticCurveTo(width * 0.25, 12, width * 0.5, 0);
-       ctx.quadraticCurveTo(width * 0.3, -15, 0, 0);
-       ctx.fill();
-
-       ctx.restore();
-     }
-   }
-   ```
-
-2. **Register in `src/effects/index.ts`**:
-   ```typescript
-   import { MustacheEffect } from './mustache';
-   // Inside constructor:
-   this.register(new MustacheEffect());
-   ```
-
-3. **Add to Dock Carousel in `src/components/EffectDock.tsx`**:
-   ```typescript
-   { id: 'mustache', name: 'Mustache', keyNumber: '8', icon: Smile, hint: 'Twirls on smile' }
-   ```
+1. **No Data Transmission:** The application does not establish outbound telemetry sockets or transmit camera frames across the network.
+2. **Zero Biometric Profiling:** The vision models classify purely geometric physical landmark positions. No facial recognition, emotional diagnosis, or demographic labeling is performed.
+3. **Transient Memory Footprint:** Video frame buffers and landmark tensors are discarded immediately after rendering each frame.
 
 ---
 
-## 🎭 5. Parent Demo Script (30 Seconds)
-
-> **Setting:** Kiosk / Event Demo Display  
-> **Speaker:** Demonstrator / Parent to Child
-
-1. **[0:00 - 0:08] The Intro:**  
-   *"Look into the Magic Mirror! Stand right here with me — see how it spots both of us and puts glowing golden crowns on our heads?"*  
-   *(Stand together ~1.5 - 2 meters from the screen. Crowns and sparkle auras lock onto both faces immediately.)*
-
-2. **[0:08 - 0:15] The Smile & Eyebrow Reaction:**  
-   *"Now, give the mirror a giant smile! ✨"*  
-   *(Smile broadly → Sparkles erupt from the crown gems, and the aura flares bright gold.)*  
-   *"Now raise your eyebrows high like you're super surprised!"*  
-   *(Raise eyebrows → Cool sunglasses smoothly flip up onto the forehead with spring physics.)*
-
-3. **[0:15 - 0:22] The Rainbow & Wiggle:**  
-   *"Open your mouth wide like 'Aaaaah'!"*  
-   *(Open mouth → A bright cascade of rainbow ribbons streams outward.)*  
-   *"Tilt your head left and right!"*  
-   *(Tilt head → Fox ears wiggle back and forth dynamically with spring physics.)*
-
-4. **[0:22 - 0:30] Capture the Souvenir:**  
-   *"Let's take a photo together — 3, 2, 1, smile!"*  
-   *(Press Spacebar or tap Capture 📸 → Flash goes off, confetti bursts on screen, and your photo is ready to download!)*
-
 ---
 
-## ⚠️ 6. Technical Limitations & Physical Movement Clarification
+## ⚖️ Intellectual Property & Copyright Notice
 
-1. **Ambient Lighting:**
-   - MediaPipe requires sufficient contrast to locate facial landmarks. In dim rooms (< 30 lux), an ambient warning chip appears: *"Lighting looks dim — brighter light gives sharper head tracking!"*
-2. **Face Coverings & Extreme Glasses:**
-   - Thick dark sunglasses or opaque face masks obscure eye/mouth landmarks. Clear eyeglasses are handled cleanly by the 1€ filter.
-3. **Head Pose Angles:**
-   - Accurate tracking operates within $\pm 45^\circ$ yaw (looking left/right) and $\pm 35^\circ$ pitch (looking up/down). Extreme profile views (> $60^\circ$) will gracefully retain last known positions.
-4. **Physical Movement vs. Emotion:**
-   - The expression classifications (*Smile*, *Sad face*, *Angry face*, *Mouth open*, *Eyebrows raised*, *Wink*, *Kiss shape*) represent purely physical biometric geometric contractions. They **never** diagnose or infer human emotional states (e.g. happiness, sadness, or intent).
+**Copyright © 2026 Nitesh Kumar. All Rights Reserved.**
 
----
+### Terms of Use:
+- **No Unauthorized Reproduction:** The source code, visual design, custom shaders, and architectural assets contained in this repository are proprietary.
+- **No Commercial Exploitation:** No part of this project may be copied, modified, distributed, sublicensed, sold, or used for commercial purposes without explicit prior written authorization from the copyright holder.
+- **Academic & Portfolio Reference Only:** This repository is hosted publicly solely for demonstration, peer review, and portfolio evaluation purposes.
 
-## ⌨️ 7. Keyboard Shortcuts
+For licensing inquiries, collaboration requests, or deployment permissions, please contact the repository owner directly.
 
-| Key | Action |
-|:---:|:---|
-| <kbd>Space</kbd> | Start 3-2-1 photo capture countdown |
-| <kbd>F</kbd> | Toggle Fullscreen mode |
-| <kbd>M</kbd> | Toggle Horizontal Video Mirroring |
-| <kbd>1</kbd> – <kbd>7</kbd> | Toggle individual effects (Crown, Shades, Aura, Rainbow, Hearts, Sci-Mesh, Animals) |
-| <kbd>Esc</kbd> | Close Settings Drawer / Photo Preview Modal |
 
----
-
-## 📄 License
-MIT License. Built for privacy-first interactive educational and entertainment experiences.
