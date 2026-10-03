@@ -1,0 +1,48 @@
+import { ThemeId, ThemeConfig } from '../types';
+
+export const THEMES: Record<ThemeId, ThemeConfig> = {
+  royal: {
+    id: 'royal',
+    name: 'Royal Palace',
+    description: 'Imperial golds, deep sapphire velvet, and radiant diamond sparkles',
+    primaryColor: '#f59e0b',
+    secondaryColor: '#3b82f6',
+    accentColor: '#ec4899',
+    glowColor: 'rgba(245, 158, 11, 0.45)',
+    vignetteColor: 'rgba(30, 27, 75, 0.35)',
+    particleColors: ['#fbbf24', '#f59e0b', '#fef08a', '#ffffff', '#60a5fa'],
+  },
+  space: {
+    id: 'space',
+    name: 'Cosmic Nebula',
+    description: 'Electric violet, celestial cyan, and twinkling stardust',
+    primaryColor: '#8b5cf6',
+    secondaryColor: '#06b6d4',
+    accentColor: '#ec4899',
+    glowColor: 'rgba(139, 92, 246, 0.45)',
+    vignetteColor: 'rgba(15, 23, 42, 0.45)',
+    particleColors: ['#a855f7', '#06b6d4', '#38bdf8', '#ffffff', '#c084fc'],
+  },
+  garden: {
+    id: 'garden',
+    name: 'Enchanted Flora',
+    description: 'Lush emerald botanicals, soft blossom petals, and fairy dust',
+    primaryColor: '#10b981',
+    secondaryColor: '#f43f5e',
+    accentColor: '#facc15',
+    glowColor: 'rgba(16, 185, 129, 0.45)',
+    vignetteColor: 'rgba(6, 78, 59, 0.3)',
+    particleColors: ['#34d399', '#f43f5e', '#fbbf24', '#fbcfe8', '#a7f3d0'],
+  },
+  neon: {
+    id: 'neon',
+    name: 'Cyber Neon',
+    description: 'High-octane ultraviolet, hyper-pink, and electric yellow',
+    primaryColor: '#f43f5e',
+    secondaryColor: '#06b6d4',
+    accentColor: '#eab308',
+    glowColor: 'rgba(244, 63, 94, 0.5)',
+    vignetteColor: 'rgba(39, 6, 88, 0.4)',
+    particleColors: ['#f43f5e', '#06b6d4', '#eab308', '#ec4899', '#22d3ee'],
+  },
+};
